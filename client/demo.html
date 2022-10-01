@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo</title>
+</head>
+<body>
+    <div id="output"></div>
+    <script src="/challenge.js"></script>
+    <script>
+        const outputEl = document.getElementById("output")
+        function log(msg) {
+            console.log(msg)
+            const msgEl = document.createElement("div")
+            msgEl.innerText = msg
+            outputEl.appendChild(msgEl)
+        }
+        (async function() {
+            log("> Fetching challenge...")
+            const challengeResponse = await fetch("/challenge")
+            if (challengeResponse.status != 200) {
+                log("Got response status " + challengeResponse.status)
+                return
+            }
+            log("> Parsing challenge...")
+            const challengeObj = await challengeResponse.json()
+            log(challengeObj)
+            log("> Solving challenge...")
+            const start = new Date().getTime()
+            const solutionStr = await SolveChallenge(challengeObj)
+            const duration = ((end = new Date().getTime()) - start) / 1000
+            log("Took " + duration + "s")
+            log(solutionStr)
+            log("> Checking challenge...")
+            const solveResponse = await fetch("/solve", {
+                method: "POST",
+                body: solutionStr,
+                headers: { "Content-type": "application/json" }
+            })
+            log("Got response " + solveResponse.status + ": " + solveResponse.statusText)
+        })()
+    </script>
+</body>
+</html>
