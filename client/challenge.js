@@ -1,12 +1,26 @@
 "use strict";
 
+/**
+ * A public challengeSalt - should be unique for each website
+ */
 const challengeSalt = new Uint8Array([29, 215, 51, 123, 17, 173, 109, 69, 105, 225, 104, 175, 142, 141, 150, 11, 47, 217, 158, 208, 209, 170, 85, 55, 34, 158, 139, 82, 119, 133, 224, 162, 73, 185, 90, 9, 176, 36, 45, 10, 123, 38, 125, 213, 88, 14, 1, 192, 86, 170, 176, 193, 44, 130, 127, 238, 157, 37, 210, 113, 133, 5, 49, 238])
 
-// Decode a base64 Query to an Array
+/**
+ * queryToArray decodes a base64 Query to an Array
+ * 
+ * @param {String} query representing a base64 encoded array
+ * @returns {Array<Number>} an array of bytes
+ */
 function queryToArray(query) {
     return Array.from(atob(query), (c) => c.charCodeAt(0))
 }
 
+/**
+ * SolveChallenge solves a challenge given by the server
+ * 
+ * @param {Object} challengeObj parsed JSON Object received from the server
+ * @returns {String} data to return to the validating server
+ */
 async function SolveChallenge(challengeObj) {
     let guess = [0,0,0,0].concat(queryToArray(challengeObj["q"]))
     const challenge = queryToArray(challengeObj["c"])
@@ -53,6 +67,14 @@ async function SolveChallenge(challengeObj) {
     }
 }
 
+/**
+ * solveOneChallenge is the internal solver used to solve a single challenge
+ * 
+ * @param {Array<Number>} key the key to use for the challenge
+ * @param {Number} iterations the number of iterations required by the server
+ * @param {Array<Number>} challenge the expected result of the hash 
+ * @returns {Boolean} true if successful or false
+ */
 async function solveOneChallenge(key, iterations, challenge) {
     const value = new Uint8Array(await crypto.subtle.deriveBits({
         name:     "PBKDF2",
